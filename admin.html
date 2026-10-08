@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Big Catch Salvage and Thrift</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; background: #f5f6f8; color: #2c2c2c; font-size: 14px; line-height: 1.5; }
+  a { color: inherit; text-decoration: none; cursor: pointer; }
+  button { font-family: inherit; cursor: pointer; }
+  #login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #1a1a1a; }
+  .login-card { background: #fff; padding: 48px 40px; border-radius: 10px; width: 100%; max-width: 380px; box-shadow: 0 20px 60px rgba(0,0,0,0.35); text-align: center; }
+  .login-card .brand { font-size: 20px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; color: #3a3a3a; line-height: 1.1; margin-bottom: 28px; }
+  .login-card .brand span { display: block; }
+  .login-card h2 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .login-card p.sub { font-size: 12px; color: #888; margin-bottom: 24px; }
+  .login-card input { width: 100%; padding: 12px 14px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; margin-bottom: 14px; }
+  .login-card input:focus { outline: none; border-color: #1a1a1a; }
+  .login-card button { width: 100%; padding: 13px; background: #1a1a1a; color: #fff; border: none; border-radius: 4px; font-size: 13px; font-weight: 700; letter-spacing: 1px; }
+  .login-card button:hover { background: #333; }
+  .login-error { color: #c0392b; font-size: 12px; margin-top: 12px; min-height: 16px; }
+  #admin-screen { display: none; }
+  .admin-header { background: #1a1a1a; color: #fff; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50; }
+  .admin-header .logo { font-size: 16px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; line-height: 1.1; }
+  .admin-header .logo span { display: block; }
+  .admin-header .actions { display: flex; gap: 12px; align-items: center; }
+  .admin-header .actions a, .admin-header .actions button { color: #fff; background: transparent; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+  .admin-header .actions a:hover, .admin-header .actions button:hover { background: rgba(255,255,255,0.12); }
+  .admin-wrap { max-width: 1100px; margin: 0 auto; padding: 32px 24px 80px; }
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .stat-card { background: #fff; padding: 20px 24px; border-radius: 8px; border: 1px solid #e5e5e5; }
+  .stat-card .label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #888; font-weight: 700; }
+  .stat-card .value { font-size: 26px; font-weight: 800; margin-top: 6px; }
+  .stat-card .value.sold { color: #c0392b; }
+  .panel { background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; padding: 28px; margin-bottom: 28px; }
+  .panel h2 { font-size: 16px; font-weight: 800; margin-bottom: 20px; }
+  .form-grid { display: grid; gap: 16px; }
+  .form-grid label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #666; display: block; margin-bottom: 6px; }
+  .form-grid input[type=text], .form-grid input[type=number] { width: 100%; padding: 11px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+  .form-grid input:focus { outline: none; border-color: #1a1a1a; }
+  .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .checkbox-line { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #444; cursor: pointer; }
+  .checkbox-line input { width: 16px; height: 16px; cursor: pointer; }
+  .images-section { padding: 16px; background: #fafafa; border: 1px solid #e5e5e5; border-radius: 6px; }
+  .images-section h4 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #555; margin-bottom: 14px; }
+  .image-slot { display: grid; grid-template-columns: 80px 1fr auto; gap: 12px; align-items: center; padding: 12px; background: #fff; border: 1px solid #e5e5e5; border-radius: 6px; margin-bottom: 10px; }
+  .image-slot .slot-preview { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; background: #f0f0f0; border: 1px solid #e5e5e5; display: block; }
+  .image-slot .slot-fields { display: grid; gap: 6px; }
+  .image-slot .slot-fields label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #888; margin: 0; }
+  .image-slot input[type=text] { padding: 8px 10px; border: 1px solid #ccc; border-radius: 3px; font-size: 13px; width: 100%; }
+  .image-slot .slot-actions { display: flex; gap: 6px; align-items: center; }
+  .image-slot .slot-btn { padding: 8px 12px; font-size: 11px; font-weight: 600; border-radius: 3px; border: 1px solid #ccc; background: #fff; cursor: pointer; white-space: nowrap; }
+  .image-slot .slot-btn:hover { background: #f2f2f2; }
+  .image-slot .slot-btn.remove { color: #c0392b; border-color: #e0b4ae; }
+  .add-image-btn { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 12px; background: #fff; border: 2px dashed #ccc; border-radius: 6px; font-size: 13px; font-weight: 600; color: #555; cursor: pointer; margin-top: 8px; }
+  .add-image-btn:hover { border-color: #1a1a1a; color: #1a1a1a; background: #f9f9f9; }
+  .search-bar { margin-bottom: 20px; }
+  .search-bar input { width: 100%; padding: 12px 16px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+  .product-table { width: 100%; border-collapse: collapse; }
+  .product-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; color: #888; font-weight: 700; padding: 10px 12px; border-bottom: 1px solid #e5e5e5; }
+  .product-table td { padding: 14px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  .product-table tr:hover td { background: #fafafa; }
+  .product-table tr.sold-row td { background: #fef6f5; }
+  .product-table .thumb { width: 52px; height: 52px; object-fit: cover; border-radius: 4px; background: #f6f6f6; display: block; }
+  .product-table .title-cell { font-weight: 600; font-size: 13px; }
+  .product-table .price-cell { font-size: 13px; }
+  .product-table .price-cell .was { text-decoration: line-through; color: #999; margin-right: 6px; }
+  .product-table .price-cell .now { color: #c0392b; font-weight: 700; }
+  .product-table .tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 10px; background: #eee; color: #555; margin-right: 4px; }
+  .product-table .tag.sale { background: #fdeaea; color: #c0392b; }
+  .product-table .tag.noship { background: #1a1a1a; color: #fff; }
+  .product-table .tag.sold { background: #c0392b; color: #fff; }
+  .product-table .tag.images { background: #e3f2fd; color: #1565c0; }
+  .row-actions button { padding: 7px 14px; font-size: 12px; border-radius: 4px; border: 1px solid #ccc; background: #fff; margin-left: 6px; font-weight: 600; }
+  .row-actions button:hover { border-color: #1a1a1a; background: #f2f2f2; }
+  .row-actions button.delete { color: #c0392b; border-color: #e0b4ae; }
+  .row-actions button.copy-link { color: #1565c0; border-color: #90caf9; }
+  .empty-state { text-align: center; padding: 60px 20px; color: #999; }
+  .btn-row { display: flex; gap: 12px; margin-top: 4px; flex-wrap: wrap; }
+  .btn { padding: 12px 28px; background: #1a1a1a; color: #fff; border: none; border-radius: 4px; font-size: 13px; font-weight: 700; }
+  .btn:hover { background: #333; }
+  .btn.secondary { background: #fff; color: #1a1a1a; border: 1px solid #1a1a1a; }
+  .btn.danger { background: #fff; color: #c0392b; border: 1px solid #c0392b; }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 14px 22px; border-radius: 6px; font-size: 13px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,0.25); opacity: 0; transform: translateY(10px); transition: all 0.25s; pointer-events: none; z-index: 200; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.success { background: #27ae60; }
+  .toast.error { background: #c0392b; }
+  .loading-banner { padding: 20px; text-align: center; color: #666; background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; margin-bottom: 20px; }
+  @media (max-width: 700px) {
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .form-row-2 { grid-template-columns: 1fr; }
+    .product-table .col-hide { display: none; }
+    .admin-header { padding: 14px 16px; flex-wrap: wrap; gap: 8px; }
+    .image-slot { grid-template-columns: 1fr; }
+    .image-slot .slot-preview { width: 60px; height: 60px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <div class="brand"><span>BIG CATCH</span><span>SALVAGE &amp; THRIFT</span></div>
+    <h2>Admin Login</h2>
+    <p class="sub">Enter your password to manage products</p>
+    <input type="password" id="admin-password" placeholder="Password" autofocus>
+    <button onclick="adminLogin()">Log In</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<div id="admin-screen">
+  <div class="admin-header">
+    <div class="logo"><span>BIG CATCH</span><span>ADMIN PANEL</span></div>
+    <div class="actions">
+      <span style="font-size:13px;opacity:0.9;">📞 +1 (980) 734-8301</span>
+      <a href="index.html" target="_blank">View Store</a>
+      <button onclick="logout()">Log Out</button>
+    </div>
+  </div>
+
+  <div class="admin-wrap">
+    <div id="loading-banner" class="loading-banner">Loading products from Firebase…</div>
+
+    <div class="stats-row">
+      <div class="stat-card"><div class="label">Total Products</div><div class="value" id="stat-total">0</div></div>
+      <div class="stat-card"><div class="label">On Sale</div><div class="value" id="stat-sale">0</div></div>
+      <div class="stat-card"><div class="label">Pickup Only</div><div class="value" id="stat-noship">0</div></div>
+      <div class="stat-card"><div class="label">Sold</div><div class="value sold" id="stat-sold">0</div></div>
+    </div>
+
+    <div class="panel">
+      <h2 id="form-heading">➕ Add New Product</h2>
+      <div class="form-grid">
+        <div>
+          <label>Product Title</label>
+          <input id="f-title" type="text" placeholder="e.g. Keurig Coffee Maker">
+        </div>
+        <div class="form-row-2">
+          <div><label>Price ($)</label><input id="f-price" type="number" step="0.01" placeholder="45.00"></div>
+          <div><label>Sale Price ($ — optional)</label><input id="f-sale" type="number" step="0.01" placeholder=""></div>
+        </div>
+
+        <div class="images-section">
+          <h4>📷 Product Images (up to 6)</h4>
+          <div id="image-slots"></div>
+          <button type="button" class="add-image-btn" id="add-image-btn" onclick="addImageSlot()">
+            ➕ Add Another Image
+          </button>
+        </div>
+
+        <label class="checkbox-line">
+          <input id="f-noship" type="checkbox"> No shipping — pickup only
+        </label>
+        <label class="checkbox-line">
+          <input id="f-sold" type="checkbox"> Mark as SOLD
+        </label>
+
+        <div class="btn-row">
+          <button class="btn" id="save-btn" onclick="saveProduct()">Add Product</button>
+          <button class="btn secondary" id="cancel-btn" style="display:none;" onclick="cancelEdit()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>📦 All Products (<span id="list-count">0</span>)</h2>
+      <div class="search-bar">
+        <input type="text" id="admin-search" placeholder="Search products by title…" oninput="renderList()">
+      </div>
+      <div id="product-list"></div>
+    </div>
+
+    <div class="panel">
+      <h2>⚙️ Danger Zone</h2>
+      <p style="font-size:13px;color:#666;margin-bottom:16px;">Load the original demo products into Firebase. Only do this once on a fresh database.</p>
+      <button class="btn danger" onclick="seedProducts()">Seed Demo Products</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  /* ============ FIREBASE SETUP ============ */
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, doc, setDoc, addDoc, deleteDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDLspv7TZ98QLFGwwPYRVR8mAKNT5nYQkk",
+    authDomain: "big-catchstore.firebaseapp.com",
+    projectId: "big-catchstore",
+    storageBucket: "big-catchstore.firebasestorage.app",
+    messagingSenderId: "902678890681",
+    appId: "1:902678890681:web:e14b9164661d1de5a33368"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const ADMIN_PASSWORD = "bigcatch2026";
+  const MAX_IMAGES = 6;
+
+  let allProducts = [];
+  let editingId = null;
+  let imageSlots = [{ url: '', localPreview: null }];
+
+  /* ============ AUTH ============ */
+  function adminLogin() {
+    const pw = document.getElementById('admin-password').value;
+    if (pw === ADMIN_PASSWORD) {
+      sessionStorage.setItem('bc_admin', '1');
+      showAdmin();
+    } else {
+      document.getElementById('login-error').textContent = 'Incorrect password. Try again.';
+    }
+  }
+  function logout() {
+    sessionStorage.removeItem('bc_admin');
+    document.getElementById('admin-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('admin-password').value = '';
+    document.getElementById('login-error').textContent = '';
+  }
+  async function showAdmin() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-screen').style.display = 'block';
+    await loadProducts();
+    renderAll();
+    document.getElementById('loading-banner').style.display = 'none';
+  }
+  document.getElementById('admin-password').addEventListener('keydown', e => { if (e.key === 'Enter') adminLogin(); });
+
+  /* ============ LOAD PRODUCTS ============ */
+  async function loadProducts() {
+    const snapshot = await getDocs(collection(db, 'products'));
+    allProducts = [];
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      allProducts.push({
+        id: docSnap.id,
+        title: data.title || '',
+        price: parseFloat(data.price) || 0,
+        salePrice: data.salePrice != null && data.salePrice !== '' ? parseFloat(data.salePrice) : null,
+        images: data.images || (data.image ? [data.image] : []),
+        noShipping: data.noShipping === true,
+        sold: data.sold === true,
+        createdAt: data.createdAt?.toMillis ? data.createdAt.toMillis() : (data.createdAt || 0)
+      });
+    });
+    allProducts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  }
+
+  /* ============ IMAGE MANAGER ============ */
+  function resetImageSlots() {
+    imageSlots = [{ url: '', localPreview: null }];
+    renderImageSlots();
+  }
+
+  function addImageSlot() {
+    if (imageSlots.length >= MAX_IMAGES) { toast('Maximum ' + MAX_IMAGES + ' images.', true); return; }
+    imageSlots.push({ url: '', localPreview: null });
+    renderImageSlots();
+  }
+
+  function removeImageSlot(index) {
+    if (imageSlots.length <= 1) { toast('At least one image required.', true); return; }
+    imageSlots.splice(index, 1);
+    renderImageSlots();
+  }
+
+  function updateImageUrl(index, value) {
+    if (imageSlots[index]) {
+      imageSlots[index].url = value;
+      const preview = document.getElementById('slot-preview-' + index);
+      if (preview && value) preview.src = value;
+    }
+  }
+
+  function renderImageSlots() {
+    const wrap = document.getElementById('image-slots');
+    if (!wrap) return;
+    wrap.innerHTML = imageSlots.map((slot, i) => {
+      const previewSrc = slot.localPreview || slot.url || 'https://placehold.co/200x200/f0f0f0/999999?text=?';
+      const isMain = i === 0;
+      return `
+        <div class="image-slot">
+          <img class="slot-preview" id="slot-preview-${i}" src="${previewSrc}" onerror="this.src='https://placehold.co/200x200/f0f0f0/999999?text=?'">
+          <div class="slot-fields">
+            <label>${isMain ? '⭐ Main Image' : 'Image ' + (i + 1)}</label>
+            <input type="text" value="${escapeAttr(slot.url)}" placeholder="https://... or upload" oninput="updateImageUrl(${i}, this.value)">
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+              <input type="file" id="slot-file-${i}" accept="image/*" style="display:none;" onchange="uploadSlotImage(${i}, this)">
+              <button type="button" class="slot-btn" onclick="document.getElementById('slot-file-${i}').click()">📁 Upload from PC</button>
+              <span style="font-size:10px;color:#888;" id="slot-status-${i}"></span>
+            </div>
+          </div>
+          <div class="slot-actions">
+            ${imageSlots.length > 1 ? `<button type="button" class="slot-btn remove" onclick="removeImageSlot(${i})" title="Remove">✕</button>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+    const addBtn = document.getElementById('add-image-btn');
+    if (addBtn) {
+      addBtn.disabled = imageSlots.length >= MAX_IMAGES;
+      addBtn.textContent = imageSlots.length >= MAX_IMAGES ? '✓ Maximum reached' : '➕ Add Another Image';
+    }
+  }
+
+  function escapeAttr(str) {
+    return String(str || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  async function uploadSlotImage(index, input) {
+    const file = input.files[0];
+    if (!file) return;
+    const slot = imageSlots[index];
+    if (!slot) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      slot.localPreview = e.target.result;
+      const preview = document.getElementById('slot-preview-' + index);
+      if (preview) preview.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+
+    const status = document.getElementById('slot-status-' + index);
+    if (status) { status.textContent = '⏳ Uploading...'; status.style.color = '#666'; }
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch('https://api.imgur.com/3/image', {
+        method: 'POST',
+        headers: { 'Authorization': 'Client-ID 546c25a59c58ad7' },
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        slot.url = data.data.link;
+        slot.localPreview = null;
+        const inputField = document.querySelectorAll('.image-slot input[type=text]')[index];
+        if (inputField) inputField.value = data.data.link;
+        if (status) { status.textContent = '✅ Uploaded!'; status.style.color = '#27ae60'; }
+      } else {
+        throw new Error('Upload failed');
+      }
+    } catch (err) {
+      console.error(err);
+      if (status) { status.textContent = '❌ Failed'; status.style.color = '#c0392b'; }
+      toast('Upload failed. Try again or paste a URL.', true);
+    } finally {
+      input.value = '';
+    }
+  }
+
+  /* ============ RENDER ============ */
+  function renderAll() { renderStats(); renderList(); }
+
+  function renderStats() {
+    document.getElementById('stat-total').textContent  = allProducts.length;
+    document.getElementById('stat-sale').textContent   = allProducts.filter(p => p.salePrice != null).length;
+    document.getElementById('stat-noship').textContent = allProducts.filter(p => p.noShipping).length;
+    document.getElementById('stat-sold').textContent   = allProducts.filter(p => p.sold).length;
+    document.getElementById('list-count').textContent  = allProducts.length;
+  }
+
+  function renderList() {
+    const q = (document.getElementById('admin-search').value || '').toLowerCase().trim();
+    const filtered = q ? allProducts.filter(p => p.title.toLowerCase().includes(q)) : allProducts;
+    const wrap = document.getElementById('product-list');
+
+    if (filtered.length === 0) {
+      wrap.innerHTML = '<div class="empty-state">No products found.</div>';
+      return;
+    }
+
+    wrap.innerHTML = `
+      <table class="product-table">
+        <thead><tr>
+          <th style="width:70px;">Image</th>
+          <th>Product</th>
+          <th class="col-hide" style="width:150px;">Price</th>
+          <th class="col-hide" style="width:200px;">Tags</th>
+          <th style="width:230px;text-align:right;">Actions</th>
+        </tr></thead>
+        <tbody>
+          ${filtered.map(p => {
+            const onSale = p.salePrice != null;
+            const imgCount = (p.images || []).length;
+            return `
+              <tr class="${p.sold ? 'sold-row' : ''}">
+                <td><img class="thumb" src="${(p.images && p.images[0]) || 'https://placehold.co/100x100/eeeeee/999999?text=?'}" onerror="this.src='https://placehold.co/100x100/eeeeee/999999?text=?'"></td>
+                <td class="title-cell">${escapeHtml(p.title)}</td>
+                <td class="price-cell col-hide">${onSale ? `<span class="was">$${p.price.toFixed(2)}</span><span class="now">$${p.salePrice.toFixed(2)}</span>` : `$${p.price.toFixed(2)}`}</td>
+                <td class="col-hide">
+                  ${onSale ? '<span class="tag sale">SALE</span>' : ''}
+                  ${p.noShipping ? '<span class="tag noship">NO SHIP</span>' : ''}
+                  ${p.sold ? '<span class="tag sold">SOLD</span>' : ''}
+                  ${imgCount > 1 ? `<span class="tag images">${imgCount} IMGS</span>` : ''}
+                </td>
+                <td class="row-actions" style="text-align:right;">
+                  <button class="copy-link" onclick="copyProductLink('${p.id}')" title="Copy product link">🔗 Link</button>
+                  <button onclick="editProduct('${p.id}')">Edit</button>
+                  <button class="delete" onclick="deleteProduct('${p.id}')">Delete</button>
+                </td>
+              </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+  }
+
+  function copyProductLink(id) {
+    const url = window.location.origin + '/#/product/' + id;
+    navigator.clipboard.writeText(url).then(() => toast('Link copied: ' + url, false, true)).catch(() => prompt('Copy this link:', url));
+  }
+
+  /* ============ SAVE / EDIT / DELETE ============ */
+  async function saveProduct() {
+    const title = document.getElementById('f-title').value.trim();
+    const price = parseFloat(document.getElementById('f-price').value);
+    const saleVal = document.getElementById('f-sale').value.trim();
+    const salePrice = saleVal === '' ? null : parseFloat(saleVal);
+    const noShipping = document.getElementById('f-noship').checked;
+    const sold = document.getElementById('f-sold').checked;
+
+    const images = imageSlots.map(s => (s.url || '').trim()).filter(Boolean);
+    if (!title) { toast('Please enter a product title.', true); return; }
+    if (isNaN(price) || price < 0) { toast('Please enter a valid price.', true); return; }
+    if (salePrice != null && (isNaN(salePrice) || salePrice < 0)) { toast('Invalid sale price.', true); return; }
+    if (images.length === 0) {
+      images.push('https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=800&fit=crop');
+    }
+
+    document.getElementById('save-btn').disabled = true;
+    document.getElementById('save-btn').textContent = 'Saving…';
+
+    try {
+      if (editingId != null) {
+        await updateDoc(doc(db, 'products', editingId), {
+          title, price, salePrice, images, noShipping, sold,
+          updatedAt: serverTimestamp()
+        });
+        toast('Product updated ✓', false, true);
+      } else {
+        await addDoc(collection(db, 'products'), {
+          title, price, salePrice, images, noShipping, sold,
+          createdAt: serverTimestamp()
+        });
+        toast('Product added ✓', false, true);
+      }
+      await loadProducts();
+      cancelEdit();
+      renderAll();
+    } catch (err) {
+      console.error(err);
+      toast('Save failed: ' + err.message, true);
+    } finally {
+      document.getElementById('save-btn').disabled = false;
+      document.getElementById('save-btn').textContent = editingId ? 'Update Product' : 'Add Product';
+    }
+  }
+
+  function editProduct(id) {
+    const p = allProducts.find(x => String(x.id) === String(id));
+    if (!p) return;
+    document.getElementById('f-title').value = p.title;
+    document.getElementById('f-price').value = p.price;
+    document.getElementById('f-sale').value = p.salePrice ?? '';
+    document.getElementById('f-noship').checked = p.noShipping;
+    document.getElementById('f-sold').checked = p.sold === true;
+
+    const imgs = (p.images && p.images.length) ? p.images : [];
+    imageSlots = imgs.slice(0, MAX_IMAGES).map(url => ({ url, localPreview: null }));
+    if (imageSlots.length < MAX_IMAGES) imageSlots.push({ url: '', localPreview: null });
+    renderImageSlots();
+
+    editingId = id;
+    document.getElementById('form-heading').textContent = '✏️ Edit Product';
+    document.getElementById('save-btn').textContent = 'Update Product';
+    document.getElementById('cancel-btn').style.display = 'inline-block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function cancelEdit() {
+    editingId = null;
+    ['f-title', 'f-price', 'f-sale'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-noship').checked = false;
+    document.getElementById('f-sold').checked = false;
+    document.getElementById('form-heading').textContent = '➕ Add New Product';
+    document.getElementById('save-btn').textContent = 'Add Product';
+    document.getElementById('cancel-btn').style.display = 'none';
+    resetImageSlots();
+  }
+
+  async function deleteProduct(id) {
+    const p = allProducts.find(x => String(x.id) === String(id));
+    if (!p) return;
+    if (!confirm(`Delete "${p.title}"? This cannot be undone.`)) return;
+    try {
+      await deleteDoc(doc(db, 'products', id));
+      await loadProducts();
+      renderAll();
+      toast('Product deleted', false, true);
+    } catch (err) {
+      toast('Delete failed: ' + err.message, true);
+    }
+  }
+
+  async function seedProducts() {
+    if (!confirm('Load the 12 demo products into Firebase? This adds them as new products.')) return;
+    const SEED = [
+      { title: "Keurig K-Express Coffee Maker, Black", price: 45.00, salePrice: null, images: ["https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=800&h=800&fit=crop"], noShipping: true, sold: false },
+      { title: "Beige Velvet Dining Chairs, Set of 2", price: 74.20, salePrice: null, images: ["https://images.unsplash.com/photo-1503602642458-232111445657?w=800&h=800&fit=crop"], noShipping: true, sold: false },
+      { title: "12-Light Dimmable Tiered Chandelier", price: 199.00, salePrice: 129.00, images: ["https://images.unsplash.com/photo-1543198126-a8ad8e47fb22?w=800&h=800&fit=crop"], noShipping: true, sold: false },
+      { title: "OtterBox Defender Case for iPhone 15 Pro", price: 11.25, salePrice: null, images: ["https://images.unsplash.com/photo-1601593346740-925612772716?w=800&h=800&fit=crop"], noShipping: false, sold: false },
+      { title: "Otto 20 in. Gold Round Glass Side Table", price: 69.00, salePrice: null, images: ["https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=800&h=800&fit=crop"], noShipping: false, sold: false },
+      { title: "4 in. Set of 14 Ceramic Fire Balls", price: 89.00, salePrice: 39.00, images: ["https://images.unsplash.com/photo-1519892300165-cb5542fb47c7?w=800&h=800&fit=crop"], noShipping: false, sold: false },
+      { title: "25\" Faux Boston Fern in Zinc Planter", price: 89.00, salePrice: 45.00, images: ["https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=800&h=800&fit=crop"], noShipping: false, sold: false },
+      { title: "Beige Blue Gold Ocean Storm Wall Art", price: 129.00, salePrice: 49.00, images: ["https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&h=800&fit=crop"], noShipping: false, sold: false },
+      { title: "Modern Stainless Steel Refrigerator", price: 1333.00, salePrice: null, images: ["https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=800&h=800&fit=crop"], noShipping: true, sold: false },
+      { title: "Wooden Bookcase Storage Shelf", price: 129.00, salePrice: null, images: ["https://images.unsplash.com/photo-1594620302200-9a762244a156?w=800&h=800&fit=crop"], noShipping: false, sold: false },
+      { title: "Outdoor Patio Rug, Weather Resistant", price: 89.00, salePrice: 59.00, images: ["https://images.unsplash.com/photo-1600166898405-da9535204843?w=800&h=800&fit=crop"], noShipping: false, sold: false },
+      { title: "Queen Size Upholstered Headboard", price: 225.00, salePrice: 79.00, images: ["https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800&h=800&fit=crop"], noShipping: true, sold: false }
+    ];
+    try {
+      for (const item of SEED) {
+        await addDoc(collection(db, 'products'), {
+          ...item,
+          createdAt: serverTimestamp()
+        });
+      }
+      await loadProducts();
+      renderAll();
+      toast('Demo products loaded ✓', false, true);
+    } catch (err) {
+      toast('Seed failed: ' + err.message, true);
+    }
+  }
+
+  /* ============ TOAST ============ */
+  let toastTimer = null;
+  function toast(msg, isError = false, isSuccess = false) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.remove('success', 'error');
+    if (isError) el.classList.add('error');
+    if (isSuccess) el.classList.add('success');
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+  }
+
+  /* ============ INIT ============ */
+  window.addEventListener('DOMContentLoaded', () => {
+    resetImageSlots();
+    if (sessionStorage.getItem('bc_admin') === '1') {
+      showAdmin();
+    }
+  });
+
+  window.adminLogin = adminLogin;
+  window.logout = logout;
+  window.addImageSlot = addImageSlot;
+  window.removeImageSlot = removeImageSlot;
+  window.updateImageUrl = updateImageUrl;
+  window.uploadSlotImage = uploadSlotImage;
+  window.saveProduct = saveProduct;
+  window.editProduct = editProduct;
+  window.cancelEdit = cancelEdit;
+  window.deleteProduct = deleteProduct;
+  window.seedProducts = seedProducts;
+  window.copyProductLink = copyProductLink;
+  window.renderList = renderList;
+</script>
+
+</body>
+</html>
