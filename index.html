@@ -6,59 +6,69 @@
 <title>Big Catch Salvage and Thrift</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; color: #2c2c2c; background: #fff; font-size: 14px; }
+  html { scroll-behavior: smooth; }
+  body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; color: #2c2c2c; background: #fff; font-size: 14px; animation: pageFadeIn 0.6s ease-out; }
   a { color: inherit; text-decoration: none; cursor: pointer; }
   button { font-family: inherit; }
+
   .topbar { background: #e6275f; color: #fff; text-align: center; padding: 14px 20px; font-size: 13px; font-weight: 700; line-height: 1.4; }
   .topbar a { color: #fff; text-decoration: underline; }
-  header { border-bottom: 1px solid #e5e5e5; padding: 20px 24px; }
+  header { border-bottom: 1px solid #e5e5e5; padding: 20px 24px; transition: box-shadow 0.3s ease, background 0.3s ease; position: relative; z-index: 10; }
+  header.scrolled { box-shadow: 0 4px 20px rgba(0,0,0,0.08); background: rgba(255,255,255,0.98); backdrop-filter: blur(8px); }
   .header-inner { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; max-width: 1400px; margin: 0 auto; }
-  .logo { font-size: 22px; font-weight: 900; letter-spacing: 1px; line-height: 1.05; text-transform: uppercase; color: #3a3a3a; max-width: 260px; cursor: pointer; }
+  .logo { font-size: 22px; font-weight: 900; letter-spacing: 1px; line-height: 1.05; text-transform: uppercase; color: #3a3a3a; max-width: 260px; cursor: pointer; transition: transform 0.3s ease, color 0.3s ease; }
+  .logo:hover { transform: scale(1.02); color: #e6275f; }
   .logo span { display: block; }
   .header-icons { display: flex; align-items: center; gap: 18px; padding-top: 4px; }
-  .header-icons button { background: none; border: none; cursor: pointer; padding: 0; color: #2c2c2c; position: relative; }
+  .header-icons button { background: none; border: none; cursor: pointer; padding: 0; color: #2c2c2c; position: relative; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.25s ease; }
+  .header-icons button:hover { transform: scale(1.15); color: #e6275f; }
+  .header-icons button:active { transform: scale(0.95); }
   .header-icons svg { width: 22px; height: 22px; display: block; }
-  .cart-badge { position: absolute; top: -6px; right: -8px; background: #4a90c4; color: #fff; font-size: 10px; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; font-weight: 700; }
-  .page { display: none; }
+  .cart-badge { position: absolute; top: -6px; right: -8px; background: #4a90c4; color: #fff; font-size: 10px; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; font-weight: 700; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .cart-badge.bump { animation: badgeBump 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .page { display: none; position: relative; z-index: 2; }
   .page.active { display: block; }
   .loading { text-align: center; padding: 60px 20px; color: #888; font-size: 15px; }
   .layout { display: flex; gap: 40px; padding: 30px 40px; max-width: 1400px; margin: 0 auto; }
   .sidebar { width: 180px; flex-shrink: 0; }
   .sidebar h2 { font-size: 18px; font-weight: 800; margin-bottom: 16px; letter-spacing: 0.5px; }
   .sidebar .filter-list { max-height: 1400px; overflow-y: auto; padding-right: 8px; }
-  .sidebar .filter-list a { display: block; font-size: 12px; padding: 3px 0; color: #444; line-height: 1.4; }
-  .sidebar .filter-list a:hover { text-decoration: underline; }
+  .sidebar .filter-list a { display: block; font-size: 12px; padding: 3px 0; color: #444; line-height: 1.4; background-image: linear-gradient(currentColor, currentColor); background-position: 0% 100%; background-repeat: no-repeat; background-size: 0% 2px; transition: background-size 0.3s ease, color 0.25s ease; }
+  .sidebar .filter-list a:hover { background-size: 100% 2px; }
   .sidebar .filter-list a.sold { color: #999; text-decoration: line-through; }
   .main { flex: 1; min-width: 0; }
   .main-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
   .main-head h1 { font-size: 22px; font-weight: 800; letter-spacing: 0.5px; }
   .main-head .count { font-size: 13px; color: #666; margin-left: 12px; font-weight: normal; }
-  .main-head select { padding: 8px 12px; border: 1px solid #ccc; border-radius: 3px; font-size: 13px; background: #fff; }
+  .main-head select { padding: 8px 12px; border: 1px solid #ccc; border-radius: 3px; font-size: 13px; background: #fff; transition: border-color 0.25s ease, box-shadow 0.25s ease; }
+  .main-head select:focus { outline: none; border-color: #e6275f; box-shadow: 0 0 0 3px rgba(230,39,95,0.1); }
   .filter-toggles { display: flex; gap: 16px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
   .filter-toggles label { font-size: 12px; color: #555; display: flex; align-items: center; gap: 6px; cursor: pointer; }
   .filter-toggles input { cursor: pointer; }
   .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px 20px; }
-  .card { display: flex; flex-direction: column; position: relative; }
+  .card { display: flex; flex-direction: column; position: relative; transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease; }
+  .card:hover { transform: translateY(-6px); box-shadow: 0 14px 36px rgba(0,0,0,0.10); }
   .card-img-wrap { position: relative; background: #f6f6f6; overflow: hidden; aspect-ratio: 1/1; cursor: pointer; }
-  .card-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s; }
-  .card:hover .card-img-wrap img { transform: scale(1.03); }
+  .card-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+  .card:hover .card-img-wrap img { transform: scale(1.07); }
   .card.sold .card-img-wrap img { filter: grayscale(0.6) brightness(0.75); }
-  .badge-sale { position: absolute; top: 10px; left: 10px; background: #fff; color: #1a1a1a; font-size: 11px; padding: 3px 10px; border-radius: 20px; z-index: 2; font-weight: 600; }
+  .badge-sale { position: absolute; top: 10px; left: 10px; background: #fff; color: #1a1a1a; font-size: 11px; padding: 3px 10px; border-radius: 20px; z-index: 2; font-weight: 600; animation: pulseBadge 2s ease-in-out infinite; }
   .badge-noship { position: absolute; top: 10px; right: 10px; background: #1a1a1a; color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 3px; z-index: 2; }
   .badge-sold { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-12deg); background: #c0392b; color: #fff; font-size: 22px; font-weight: 900; letter-spacing: 3px; padding: 10px 26px; border-radius: 6px; z-index: 3; box-shadow: 0 4px 16px rgba(0,0,0,0.3); border: 3px solid #fff; }
   .card-body { padding-top: 12px; display: flex; flex-direction: column; gap: 6px; }
-  .card-title { font-size: 13px; line-height: 1.4; cursor: pointer; }
+  .card-title { font-size: 13px; line-height: 1.4; cursor: pointer; transition: color 0.25s ease; }
+  .card:hover .card-title { color: #e6275f; }
   .card.sold .card-title { color: #999; }
   .card-price { font-size: 13px; font-weight: 600; }
   .card.sold .card-price { color: #999; }
   .card-price .was { text-decoration: line-through; color: #888; margin-right: 8px; font-weight: 400; }
   .card-price .now { color: #c0392b; font-weight: 700; }
-  .card .add-btn { margin-top: 8px; padding: 9px; background: #1a1a1a; color: #fff; border: none; border-radius: 3px; font-size: 12px; cursor: pointer; opacity: 0; transition: opacity 0.2s; }
-  .card:hover .add-btn { opacity: 1; }
-  .card .add-btn.sold { background: #c0392b; opacity: 1 !important; cursor: not-allowed; }
+  .card .add-btn { margin-top: 8px; padding: 9px; background: #1a1a1a; color: #fff; border: none; border-radius: 3px; font-size: 12px; cursor: pointer; opacity: 0; transform: translateY(6px); transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.25s ease; }
+  .card:hover .add-btn { opacity: 1; transform: translateY(0); }
+  .card .add-btn.sold { background: #c0392b; opacity: 1 !important; transform: none; cursor: not-allowed; }
   .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; padding: 40px 0 20px; font-size: 13px; flex-wrap: wrap; }
-  .pagination a { padding: 8px 14px; border: 1px solid #e5e5e5; border-radius: 3px; cursor: pointer; user-select: none; transition: all 0.15s; }
-  .pagination a:hover { background: #f6f6f6; border-color: #ccc; }
+  .pagination a { padding: 8px 14px; border: 1px solid #e5e5e5; border-radius: 3px; cursor: pointer; user-select: none; transition: all 0.2s ease; }
+  .pagination a:hover { background: #f6f6f6; border-color: #ccc; transform: translateY(-1px); }
   .pagination a.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; cursor: default; }
   .container { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
   .product-detail { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 24px; }
@@ -67,8 +77,8 @@
   .gallery-main img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .gallery-main .badge-sold-lg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-12deg); background: #c0392b; color: #fff; font-size: 32px; font-weight: 900; letter-spacing: 4px; padding: 14px 36px; border-radius: 8px; border: 4px solid #fff; box-shadow: 0 6px 24px rgba(0,0,0,0.4); }
   .gallery-thumbs { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
-  .gallery-thumbs img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 4px; cursor: pointer; border: 2px solid transparent; transition: border-color 0.15s; background: #f6f6f6; }
-  .gallery-thumbs img:hover { border-color: #ccc; }
+  .gallery-thumbs img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #f6f6f6; transition: transform 0.3s ease, border-color 0.25s ease, box-shadow 0.3s ease; }
+  .gallery-thumbs img:hover { transform: scale(1.08); box-shadow: 0 6px 18px rgba(0,0,0,0.15); }
   .gallery-thumbs img.active { border-color: #1a1a1a; }
   .cart-title { text-align: center; font-size: 34px; font-weight: 800; margin: 30px 0 40px; color: #3a3a3a; }
   .cart-item { display: flex; gap: 20px; padding: 24px 0; border-bottom: 1px solid #e5e5e5; align-items: flex-start; }
@@ -76,102 +86,95 @@
   .cart-item-info { flex: 1; }
   .cart-item-info h3 { font-size: 14px; margin-bottom: 8px; font-weight: 500; line-height: 1.4; }
   .cart-item-price { font-weight: 600; }
-  .cart-item-edit { padding: 8px 18px; border: 1px solid #ccc; background: #fff; font-size: 11px; letter-spacing: 1px; cursor: pointer; font-weight: 600; }
+  .cart-item-edit { padding: 8px 18px; border: 1px solid #ccc; background: #fff; font-size: 11px; letter-spacing: 1px; cursor: pointer; font-weight: 600; transition: all 0.25s ease; }
+  .cart-item-edit:hover { border-color: #1a1a1a; background: #f6f6f6; }
   .cart-summary { text-align: center; margin-top: 40px; }
   .cart-subtotal { display: flex; justify-content: center; gap: 30px; font-size: 16px; margin-bottom: 16px; }
   .cart-subtotal span:first-child { color: #555; }
   .cart-subtotal span:last-child { font-weight: 600; }
   .cart-installment { text-align: center; font-size: 13px; color: #555; margin-bottom: 10px; }
   .cart-shipping-note { text-align: center; font-style: italic; font-size: 13px; color: #777; margin: 20px 0 24px; }
-  .checkout-btn { display: block; width: 100%; max-width: 400px; margin: 0 auto 16px; padding: 16px; background: #93b3cc; color: #fff; border: none; font-size: 13px; font-weight: 700; letter-spacing: 2px; cursor: pointer; }
-  .checkout-btn:hover { background: #7fa2bd; }
+  .checkout-btn { display: block; width: 100%; max-width: 400px; margin: 0 auto 16px; padding: 16px; background: #93b3cc; color: #fff; border: none; font-size: 13px; font-weight: 700; letter-spacing: 2px; cursor: pointer; transition: all 0.3s ease; }
+  .checkout-btn:hover { background: #7fa2bd; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
   .contact-title { text-align: center; font-size: 40px; font-weight: 800; margin: 40px 0; letter-spacing: 0.5px; color: #3a3a3a; }
   .contact-form { max-width: 600px; margin: 0 auto; }
   .contact-form label { display: block; font-size: 13px; color: #555; margin-bottom: 6px; margin-top: 20px; }
-  .contact-form input, .contact-form textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 3px; font-size: 14px; font-family: inherit; }
+  .contact-form input, .contact-form textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 3px; font-size: 14px; font-family: inherit; transition: all 0.25s ease; }
+  .contact-form input:focus, .contact-form textarea:focus { outline: none; border-color: #e6275f; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(230, 39, 95, 0.12); }
   .contact-form textarea { min-height: 200px; resize: vertical; }
-  .send-btn { margin-top: 24px; padding: 14px 40px; background: #7ba3c4; color: #fff; border: none; font-size: 13px; font-weight: 700; letter-spacing: 2px; cursor: pointer; border-radius: 3px; }
+  .send-btn { margin-top: 24px; padding: 14px 40px; background: #7ba3c4; color: #fff; border: none; font-size: 13px; font-weight: 700; letter-spacing: 2px; cursor: pointer; border-radius: 3px; transition: all 0.3s ease; }
+  .send-btn:hover { background: #5f8bab; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
   .contact-info { max-width: 600px; margin: 0 auto 40px; text-align: center; padding: 24px; background: #f9f9f9; border-radius: 8px; border: 1px solid #e5e5e5; }
   .contact-info h3 { font-size: 16px; font-weight: 800; margin-bottom: 12px; }
   .contact-info a.phone { font-size: 22px; font-weight: 800; color: #e6275f; display: block; margin: 8px 0; }
 
-  /* ===== WHATSAPP BUTTON STYLES ===== */
-  .wa-btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-    background: #25D366; color: #fff; padding: 14px 28px; border-radius: 6px;
-    font-size: 14px; font-weight: 700; border: none; cursor: pointer;
-    text-decoration: none; transition: background 0.2s; line-height: 1;
-  }
-  .wa-btn:hover { background: #1ebe5b; color: #fff; }
-  .wa-btn svg { width: 22px; height: 22px; flex-shrink: 0; fill: #fff; display: block; }
+  /* WhatsApp buttons */
+  .wa-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: #25D366; color: #fff; padding: 14px 28px; border-radius: 6px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; text-decoration: none; line-height: 1; position: relative; overflow: hidden; transition: all 0.3s ease; }
+  .wa-btn:hover { background: #1ebe5b; color: #fff; transform: translateY(-2px); box-shadow: 0 10px 28px rgba(37, 211, 102, 0.4); }
+  .wa-btn::before { content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; border-radius: 50%; background: rgba(255,255,255,0.25); transform: translate(-50%, -50%); transition: width 0.5s ease, height 0.5s ease; pointer-events: none; }
+  .wa-btn:hover::before { width: 300px; height: 300px; }
+  .wa-btn svg { width: 22px; height: 22px; flex-shrink: 0; fill: #fff; display: block; position: relative; z-index: 2; }
   .wa-btn.large { padding: 16px 36px; font-size: 15px; }
   .wa-btn.large svg { width: 24px; height: 24px; }
   .wa-btn.block { display: flex; width: 100%; max-width: 400px; margin: 12px auto 0; }
 
-  /* FLOATING WHATSAPP BUTTON */
-  .wa-float {
-    position: fixed; bottom: 90px; right: 20px; z-index: 99;
-    width: 60px; height: 60px; border-radius: 50%;
-    background: #25D366; color: #fff; border: none; cursor: pointer;
-    box-shadow: 0 4px 16px rgba(37,211,102,0.5);
-    display: flex; align-items: center; justify-content: center;
-    transition: transform 0.2s;
-    text-decoration: none;
-  }
-  .wa-float:hover { transform: scale(1.1); color: #fff; }
+  /* Floating WhatsApp */
+  .wa-float { position: fixed; bottom: 90px; right: 20px; z-index: 99; width: 60px; height: 60px; border-radius: 50%; background: #25D366; color: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none; animation: waPulse 3s ease-in-out infinite; transition: transform 0.3s ease; }
+  .wa-float:hover { transform: scale(1.12) translateY(-2px); color: #fff; }
   .wa-float svg { width: 36px; height: 36px; fill: #fff; display: block; }
-  .wa-float::after {
-    content: 'Chat on WhatsApp'; position: absolute; right: 72px; top: 50%;
-    transform: translateY(-50%); background: #1a1a1a; color: #fff;
-    padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
-    white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s;
-  }
-  .wa-float:hover::after { opacity: 1; }
 
   .pay-steps { background: #fff8e6; border: 1px solid #ffe08a; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: left; }
   .pay-steps h3 { font-size: 14px; font-weight: 800; margin-bottom: 12px; color: #7a5c00; }
   .pay-steps ol { padding-left: 20px; font-size: 13px; color: #555; line-height: 1.8; }
   .screenshot-note { background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 8px; padding: 16px; margin: 16px 0; font-size: 13px; color: #2e7d32; display: flex; align-items: flex-start; gap: 10px; text-align: left; }
   .screenshot-note .icon { font-size: 20px; }
-  footer { padding: 40px 24px; text-align: center; color: #555; font-size: 13px; margin-top: 40px; }
+  footer { padding: 40px 24px; text-align: center; color: #555; font-size: 13px; margin-top: 40px; position: relative; z-index: 2; }
   .footer-links { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin-bottom: 20px; }
+  .footer-links a { background-image: linear-gradient(currentColor, currentColor); background-position: 0% 100%; background-repeat: no-repeat; background-size: 0% 2px; transition: background-size 0.3s ease, color 0.25s ease; }
+  .footer-links a:hover { background-size: 100% 2px; }
   .footer-support { margin: 20px 0; padding: 24px; background: #f9f9f9; border-radius: 8px; display: inline-block; }
   .footer-support .label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #888; font-weight: 700; margin-bottom: 12px; }
   .footer-support a.phone { font-size: 18px; font-weight: 800; color: #e6275f; display: block; margin: 6px 0; }
   .copyright { font-size: 12px; color: #888; margin-top: 20px; }
-  .btn { padding: 12px 24px; background: #1a1a1a; color: #fff; border: none; border-radius: 3px; font-size: 13px; cursor: pointer; display: inline-block; font-weight: 600; }
-  .btn:hover { background: #333; }
+  .btn { padding: 12px 24px; background: #1a1a1a; color: #fff; border: none; border-radius: 3px; font-size: 13px; cursor: pointer; display: inline-block; font-weight: 600; position: relative; overflow: hidden; transition: all 0.3s ease; }
+  .btn:hover { background: #333; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+  .btn:active { transform: translateY(0); }
+  .btn::before { content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; border-radius: 50%; background: rgba(255,255,255,0.2); transform: translate(-50%, -50%); transition: width 0.5s ease, height 0.5s ease; pointer-events: none; }
+  .btn:hover::before { width: 300px; height: 300px; }
   .btn.secondary { background: #fff; color: #1a1a1a; border: 1px solid #1a1a1a; }
+  .btn.secondary:hover { background: #f6f6f6; }
   .pay-box { max-width: 460px; margin: 0 auto; text-align: center; }
   .pay-box img.qr { width: 240px; height: 240px; margin: 24px auto; display: block; border: 1px solid #e5e5e5; border-radius: 6px; background: #fafafa; }
   .pay-total { font-size: 22px; font-weight: 700; margin: 16px 0; }
-  .pay-box input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 3px; font-size: 14px; margin-bottom: 16px; }
+  .pay-box input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 3px; font-size: 14px; margin-bottom: 16px; transition: all 0.25s ease; }
+  .pay-box input:focus { outline: none; border-color: #e6275f; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(230, 39, 95, 0.12); }
   .admin-login-box { max-width: 400px; margin: 80px auto; padding: 40px; border: 1px solid #e5e5e5; border-radius: 8px; background: #fafafa; text-align: center; }
   .admin-login-box h2 { font-size: 22px; font-weight: 800; margin-bottom: 24px; }
-  .admin-login-box input { width: 100%; padding: 12px; margin-bottom: 16px; border: 1px solid #ccc; border-radius: 3px; font-size: 14px; }
+  .admin-login-box input { width: 100%; padding: 12px; margin-bottom: 16px; border: 1px solid #ccc; border-radius: 3px; font-size: 14px; transition: all 0.25s ease; }
+  .admin-login-box input:focus { outline: none; border-color: #e6275f; box-shadow: 0 0 0 3px rgba(230,39,95,0.1); }
   .admin-login-box .error { color: #c0392b; font-size: 13px; margin-top: 8px; }
-  .home-hero { background: #f9f9f9; padding: 60px 24px; text-align: center; border-bottom: 1px solid #e5e5e5; }
+  .home-hero { background: #f9f9f9; padding: 60px 24px; text-align: center; border-bottom: 1px solid #e5e5e5; position: relative; z-index: 2; }
   .home-hero h1 { font-size: 42px; font-weight: 900; letter-spacing: 1px; color: #2c2c2c; margin-bottom: 12px; }
   .home-hero p { font-size: 16px; color: #666; max-width: 600px; margin: 0 auto 24px; line-height: 1.6; }
   .home-hero .support-line { margin-top: 28px; font-size: 14px; color: #555; }
   .home-hero .support-line a { color: #e6275f; font-weight: 800; font-size: 16px; }
   .nav-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 998; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
   .nav-overlay.open { opacity: 1; pointer-events: auto; }
-  .nav-menu { position: fixed; top: 0; right: 0; width: 320px; max-width: 85vw; height: 100%; background: #fff; z-index: 999; transform: translateX(100%); transition: transform 0.3s ease; display: flex; flex-direction: column; overflow-y: auto; box-shadow: -6px 0 30px rgba(0,0,0,0.15); }
+  .nav-menu { position: fixed; top: 0; right: 0; width: 320px; max-width: 85vw; height: 100%; background: #fff; z-index: 999; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; overflow-y: auto; box-shadow: -6px 0 30px rgba(0,0,0,0.15); }
   .nav-menu.open { transform: translateX(0); }
   .nav-menu-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid #e5e5e5; }
   .nav-menu-title { font-size: 14px; font-weight: 800; letter-spacing: 2px; color: #3a3a3a; }
   .nav-close { background: none; border: none; font-size: 22px; cursor: pointer; color: #666; padding: 4px 8px; }
   .nav-links { display: flex; flex-direction: column; padding: 16px 0; }
-  .nav-links a { padding: 14px 24px; font-size: 15px; font-weight: 600; color: #2c2c2c; border-left: 3px solid transparent; transition: all 0.15s; }
-  .nav-links a:hover { background: #f9f9f9; border-left-color: #e6275f; color: #e6275f; }
+  .nav-links a { padding: 14px 24px; font-size: 15px; font-weight: 600; color: #2c2c2c; border-left: 3px solid transparent; transition: all 0.25s ease; }
+  .nav-links a:hover { background: #f9f9f9; border-left-color: #e6275f; color: #e6275f; padding-left: 28px; }
   .nav-divider { height: 1px; background: #e5e5e5; margin: 8px 24px; }
   .nav-support { padding: 20px 24px 32px; margin-top: auto; }
   .nav-support-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #888; font-weight: 700; margin-bottom: 12px; }
   .nav-phone { display: block; font-size: 16px; font-weight: 800; color: #e6275f; margin-bottom: 8px; }
   .share-row { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
-  .share-btn { padding: 8px 14px; border: 1px solid #ccc; background: #fff; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
-  .share-btn:hover { background: #f6f6f6; }
+  .share-btn { padding: 8px 14px; border: 1px solid #ccc; background: #fff; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; position: relative; overflow: hidden; transition: all 0.25s ease; }
+  .share-btn:hover { background: #f6f6f6; transform: translateY(-1px); }
   .share-btn.wa { background: #25D366; color: #fff; border-color: #25D366; }
   .share-btn.wa:hover { background: #1ebe5b; }
   .share-btn.wa svg { fill: #fff; }
@@ -179,10 +182,10 @@
   /* POLICY MODALS */
   .policy-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.55); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
   .policy-modal.open { display: flex; }
-  .policy-modal-content { background: #fff; max-width: 720px; width: 100%; max-height: 85vh; overflow-y: auto; border-radius: 10px; padding: 40px 36px; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.35); animation: policyFade 0.25s ease; }
-  @keyframes policyFade { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-  .policy-close { position: absolute; top: 12px; right: 16px; background: none; border: none; font-size: 22px; color: #666; cursor: pointer; padding: 6px 10px; line-height: 1; }
-  .policy-close:hover { color: #000; }
+  .policy-modal-content { background: #fff; max-width: 720px; width: 100%; max-height: 85vh; overflow-y: auto; border-radius: 10px; padding: 40px 36px; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.35); }
+  .policy-modal.open .policy-modal-content { animation: modalPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+  .policy-close { position: absolute; top: 12px; right: 16px; background: none; border: none; font-size: 22px; color: #666; cursor: pointer; padding: 6px 10px; line-height: 1; transition: transform 0.3s ease, color 0.25s ease; }
+  .policy-close:hover { transform: rotate(90deg); color: #000; }
   #policy-body h1 { font-size: 24px; font-weight: 800; margin-bottom: 8px; color: #2c2c2c; }
   #policy-body .policy-date { font-size: 12px; color: #888; margin-bottom: 24px; }
   #policy-body h2 { font-size: 15px; font-weight: 800; margin-top: 24px; margin-bottom: 8px; color: #2c2c2c; }
@@ -191,20 +194,85 @@
   #policy-body a { color: #e6275f; font-weight: 600; text-decoration: underline; }
   #policy-body strong { color: #2c2c2c; }
 
+  /* BUBBLES */
+  .bubbles-container { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; opacity: 0.55; }
+  .bubble { position: absolute; bottom: -120px; border-radius: 50%; opacity: 0; animation: bubbleRise linear infinite; will-change: transform, opacity; }
+  .bubble.pink { background: radial-gradient(circle at 30% 30%, #ff7ba5, #e6275f); }
+  .bubble.green { background: radial-gradient(circle at 30% 30%, #6ee599, #25D366); }
+  .bubble.blue { background: radial-gradient(circle at 30% 30%, #7ab8e6, #4a90c4); }
+  .bubble.gray { background: radial-gradient(circle at 30% 30%, #d8d8d8, #a0a0a0); }
+  .bubble:nth-child(1) { left: 5%; width: 12px; height: 12px; animation-duration: 18s; animation-delay: 0s; }
+  .bubble:nth-child(2) { left: 15%; width: 22px; height: 22px; animation-duration: 24s; animation-delay: 2s; }
+  .bubble:nth-child(3) { left: 28%; width: 8px; height: 8px; animation-duration: 16s; animation-delay: 4s; }
+  .bubble:nth-child(4) { left: 42%; width: 18px; height: 18px; animation-duration: 22s; animation-delay: 1s; }
+  .bubble:nth-child(5) { left: 58%; width: 14px; height: 14px; animation-duration: 20s; animation-delay: 6s; }
+  .bubble:nth-child(6) { left: 72%; width: 26px; height: 26px; animation-duration: 26s; animation-delay: 3s; }
+  .bubble:nth-child(7) { left: 85%; width: 10px; height: 10px; animation-duration: 15s; animation-delay: 5s; }
+  .bubble:nth-child(8) { left: 93%; width: 16px; height: 16px; animation-duration: 19s; animation-delay: 7s; }
+
+  /* REVEAL ANIMATIONS */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); will-change: opacity, transform; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .stagger > * { opacity: 0; transform: translateY(24px); animation: cardSlideIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .stagger > *:nth-child(1) { animation-delay: 0.05s; }
+  .stagger > *:nth-child(2) { animation-delay: 0.10s; }
+  .stagger > *:nth-child(3) { animation-delay: 0.15s; }
+  .stagger > *:nth-child(4) { animation-delay: 0.20s; }
+  .stagger > *:nth-child(5) { animation-delay: 0.25s; }
+  .stagger > *:nth-child(6) { animation-delay: 0.30s; }
+  .stagger > *:nth-child(7) { animation-delay: 0.35s; }
+  .stagger > *:nth-child(8) { animation-delay: 0.40s; }
+
+  /* KEYFRAMES */
+  @keyframes pageFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes cardSlideIn { to { opacity: 1; transform: translateY(0); } }
+  @keyframes waPulse { 0%, 100% { box-shadow: 0 4px 16px rgba(37, 211, 102, 0.5); } 50% { box-shadow: 0 6px 28px rgba(37, 211, 102, 0.85); } }
+  @keyframes badgeBump { 0% { transform: scale(1); } 40% { transform: scale(1.4); } 100% { transform: scale(1); } }
+  @keyframes pulseBadge { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @keyframes modalPop { from { opacity: 0; transform: scale(0.94) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+  @keyframes bubbleRise { 0% { transform: translateY(0) translateX(0) scale(0.8); opacity: 0; } 10% { opacity: 0.9; } 50% { transform: translateY(-50vh) translateX(20px) scale(1); } 90% { opacity: 0.6; } 100% { transform: translateY(-105vh) translateX(-20px) scale(1.05); opacity: 0; } }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    .reveal, .stagger > *, .bubble { opacity: 1 !important; transform: none !important; }
+  }
+
   @media (max-width: 900px) {
     .layout { flex-direction: column; padding: 20px; }
     .sidebar { width: 100%; }
+    .sidebar .filter-list { max-height: 200px; }
     .grid { grid-template-columns: repeat(2, 1fr); gap: 20px 12px; }
-    .product-detail { grid-template-columns: 1fr; gap: 24px; }
+    header { padding: 16px 20px; }
+    .logo { font-size: 20px; }
+    .contact-title, .cart-title { font-size: 32px; }
     .home-hero h1 { font-size: 28px; }
+    .product-detail { grid-template-columns: 1fr; gap: 24px; }
+    .nav-menu { width: 280px; }
+    .wa-float { bottom: 84px; right: 14px; width: 56px; height: 56px; }
+    .wa-float svg { width: 30px; height: 30px; }
     .policy-modal-content { padding: 28px 20px; }
     #policy-body h1 { font-size: 20px; }
-    .wa-float { bottom: 84px; right: 14px; width: 56px; height: 56px; }
-    .wa-float svg { width: 32px; height: 32px; }
+    .bubbles-container { opacity: 0.35; }
+    .bubble:nth-child(n+6) { display: none; }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+    .card:hover .card-img-wrap img { transform: scale(1.03); }
   }
 </style>
 </head>
 <body>
+
+<!-- Floating Bubbles -->
+<div class="bubbles-container" aria-hidden="true">
+  <span class="bubble pink"></span>
+  <span class="bubble green"></span>
+  <span class="bubble blue"></span>
+  <span class="bubble gray"></span>
+  <span class="bubble pink"></span>
+  <span class="bubble green"></span>
+  <span class="bubble blue"></span>
+  <span class="bubble pink"></span>
+</div>
 
 <div class="topbar">
   Appliances, furniture, discount &amp; thrift, seasonal, sporting, fitness equipment and more!
@@ -237,7 +305,7 @@
       Chat on WhatsApp
     </a>
   </div>
-  <div style="max-width:1200px;margin:0 auto;padding:60px 24px;text-align:center;">
+  <div style="max-width:1200px;margin:0 auto;padding:60px 24px;text-align:center;position:relative;z-index:2;">
     <h2 style="font-size:26px;font-weight:800;margin-bottom:16px;">Why shop with us?</h2>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:30px;margin-top:40px;">
       <div><h3 style="font-size:18px;font-weight:700;margin-bottom:8px;">💰 Great Prices</h3><p style="color:#666;font-size:13px;">Deep discounts on quality salvage and thrift items.</p></div>
@@ -365,12 +433,10 @@
   <div class="copyright">© 2026, Big Catch Salvage and Thrift — USA</div>
 </footer>
 
-<!-- FLOATING WHATSAPP BUTTON (with official logo) -->
 <a href="https://wa.me/19807348301?text=Hi" target="_blank" class="wa-float" title="Chat on WhatsApp">
   <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </a>
 
-<!-- POLICY MODAL -->
 <div id="policy-modal" class="policy-modal">
   <div class="policy-modal-content">
     <button class="policy-close" onclick="closePolicy()">✕</button>
@@ -478,7 +544,12 @@
   function showPage(name) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     const el = document.getElementById('page-' + name);
-    if (el) el.classList.add('active');
+    if (el) {
+      el.classList.add('active');
+      el.style.animation = 'none';
+      void el.offsetWidth;
+      el.style.animation = 'fadeInUp 0.5s ease-out';
+    }
     if (name === 'shop') renderShop();
     if (name === 'cart') renderCart();
     if (name === 'pay') renderPay();
@@ -548,6 +619,10 @@
       document.getElementById('pagination').innerHTML = '';
       return;
     }
+
+    grid.classList.remove('stagger');
+    void grid.offsetWidth;
+    grid.classList.add('stagger');
 
     grid.innerHTML = pageProducts.map(p => {
       const onSale = p.salePrice != null;
@@ -646,7 +721,6 @@
           ${p.sold
             ? '<p style="color:#c0392b;font-size:16px;font-weight:800;margin-bottom:16px;">SOLD — This item is no longer available.</p><button class="btn" style="width:100%;background:#999;cursor:not-allowed;" disabled>SOLD OUT</button>'
             : `<button class="btn" style="width:100%;" onclick="addToCart('${p.id}'); showPage('cart');">Add to Cart</button>`}
-
           <div class="share-row">
             <button class="share-btn" onclick="copyLink('${productUrl}')">🔗 Copy Link</button>
             <a href="https://wa.me/?text=${encodeURIComponent(p.title + ' — ' + productUrl)}" target="_blank" class="share-btn wa">
@@ -686,6 +760,10 @@
       summaryEl.innerHTML = '';
       return;
     }
+    itemsEl.classList.remove('stagger');
+    void itemsEl.offsetWidth;
+    itemsEl.classList.add('stagger');
+
     itemsEl.innerHTML = cart.map(item => {
       const p = allProducts.find(x => String(x.id) === String(item.id));
       if (!p) return '';
@@ -729,64 +807,10 @@
     document.getElementById('done-view').style.display = 'block';
   }
 
-  /* POLICY MODALS */
   const POLICY_CONTENT = {
-    privacy: `
-      <h1>Privacy Policy</h1>
-      <div class="policy-date">Last updated: October 2026</div>
-      <p>At <strong>Big Catch Salvage and Thrift</strong>, we respect your privacy and are committed to protecting your personal information.</p>
-      <h2>1. Information We Collect</h2>
-      <p>We collect only the information you provide when you contact us or place an order:</p>
-      <ul><li>Your name, phone number, and email address</li><li>Delivery or pickup preferences</li><li>Payment confirmation screenshots (for order verification only)</li></ul>
-      <h2>2. How We Use Your Information</h2>
-      <p>Your information is used solely to process orders, respond to inquiries, and improve our service. We never sell, rent, or share your data with third parties.</p>
-      <h2>3. Payment Information</h2>
-      <p>We do not store credit card or bank details. Payments are made directly through your bank or payment app.</p>
-      <h2>4. Cookies & Analytics</h2>
-      <p>Our site may use basic cookies to remember your cart. We do not use tracking or advertising cookies.</p>
-      <h2>5. Your Rights</h2>
-      <p>You can request access to or deletion of your personal information at any time by contacting us at <a href="tel:+19807348301">+1 (980) 734-8301</a>.</p>
-      <h2>6. Contact Us</h2>
-      <p>For any privacy-related questions, call or WhatsApp us at <strong>+1 (980) 734-8301</strong>.</p>
-    `,
-    refund: `
-      <h1>Refund Policy</h1>
-      <div class="policy-date">Last updated: October 2026</div>
-      <p>We want you to be satisfied with your purchase. Please read our refund policy carefully.</p>
-      <h2>1. All Sales — As-Is</h2>
-      <p>Because we sell salvaged, thrift, and clearance items, <strong>all sales are final unless the item is defective or significantly not as described</strong>.</p>
-      <h2>2. Eligibility for Refund</h2>
-      <p>You may request a refund within <strong>3 days of pickup or delivery</strong> if:</p>
-      <ul><li>The item is broken, non-functional, or damaged</li><li>The item is significantly different from the description or photos</li><li>You received the wrong item</li></ul>
-      <h2>3. How to Request a Refund</h2>
-      <p>Contact us via WhatsApp or call <strong>+1 (980) 734-8301</strong> with:</p>
-      <ul><li>Your order reference number</li><li>Photos of the issue</li><li>A brief description of the problem</li></ul>
-      <h2>4. Refund Method</h2>
-      <p>Approved refunds are issued to the original payment method within <strong>5–7 business days</strong>. For local pickup orders, we may offer store credit or an exchange.</p>
-      <h2>5. Non-Refundable Items</h2>
-      <p>Items marked <strong>"SOLD AS-IS"</strong> or <strong>"FINAL SALE"</strong> are not eligible for refund.</p>
-      <h2>6. Return Shipping</h2>
-      <p>For shipped items, return shipping costs are the customer's responsibility unless the error was ours.</p>
-    `,
-    terms: `
-      <h1>Terms of Service</h1>
-      <div class="policy-date">Last updated: October 2026</div>
-      <p>By using the <strong>Big Catch Salvage and Thrift</strong> website and placing an order, you agree to the following terms.</p>
-      <h2>1. Products & Availability</h2>
-      <p>All products are subject to availability. Once an item is marked <strong>SOLD</strong>, it is no longer available.</p>
-      <h2>2. Pricing</h2>
-      <p>Prices are listed in US Dollars (USD). We reserve the right to change prices at any time.</p>
-      <h2>3. Orders & Payment</h2>
-      <p>Orders are confirmed only after payment is received and verified. You must send a payment screenshot via WhatsApp.</p>
-      <h2>4. Pickup & Shipping</h2>
-      <p>Some items are <strong>pickup only</strong> and are clearly marked. Pickup must be arranged within <strong>7 days</strong> of order confirmation.</p>
-      <h2>5. Limitation of Liability</h2>
-      <p>Big Catch Salvage and Thrift is not liable for damages arising from the use or misuse of items purchased. All items are sold as-is.</p>
-      <h2>6. Intellectual Property</h2>
-      <p>All content on this site — logos, text, photos, and layout — belongs to Big Catch Salvage and Thrift.</p>
-      <h2>7. Contact</h2>
-      <p>Questions? Reach us at <strong>+1 (980) 734-8301</strong> via call or WhatsApp.</p>
-    `
+    privacy: `<h1>Privacy Policy</h1><div class="policy-date">Last updated: October 2026</div><p>At <strong>Big Catch Salvage and Thrift</strong>, we respect your privacy and are committed to protecting your personal information.</p><h2>1. Information We Collect</h2><p>We collect only the information you provide when you contact us or place an order:</p><ul><li>Your name, phone number, and email address</li><li>Delivery or pickup preferences</li><li>Payment confirmation screenshots (for order verification only)</li></ul><h2>2. How We Use Your Information</h2><p>Your information is used solely to process orders, respond to inquiries, and improve our service. We never sell, rent, or share your data with third parties.</p><h2>3. Payment Information</h2><p>We do not store credit card or bank details. Payments are made directly through your bank or payment app.</p><h2>4. Cookies & Analytics</h2><p>Our site may use basic cookies to remember your cart. We do not use tracking or advertising cookies.</p><h2>5. Your Rights</h2><p>You can request access to or deletion of your personal information at any time by contacting us at <a href="tel:+19807348301">+1 (980) 734-8301</a>.</p><h2>6. Contact Us</h2><p>For any privacy-related questions, call or WhatsApp us at <strong>+1 (980) 734-8301</strong>.</p>`,
+    refund: `<h1>Refund Policy</h1><div class="policy-date">Last updated: October 2026</div><p>We want you to be satisfied with your purchase. Please read our refund policy carefully.</p><h2>1. All Sales — As-Is</h2><p>Because we sell salvaged, thrift, and clearance items, <strong>all sales are final unless the item is defective or significantly not as described</strong>.</p><h2>2. Eligibility for Refund</h2><p>You may request a refund within <strong>3 days of pickup or delivery</strong> if:</p><ul><li>The item is broken, non-functional, or damaged</li><li>The item is significantly different from the description or photos</li><li>You received the wrong item</li></ul><h2>3. How to Request a Refund</h2><p>Contact us via WhatsApp or call <strong>+1 (980) 734-8301</strong> with:</p><ul><li>Your order reference number</li><li>Photos of the issue</li><li>A brief description of the problem</li></ul><h2>4. Refund Method</h2><p>Approved refunds are issued to the original payment method within <strong>5–7 business days</strong>. For local pickup orders, we may offer store credit or an exchange.</p><h2>5. Non-Refundable Items</h2><p>Items marked <strong>"SOLD AS-IS"</strong> or <strong>"FINAL SALE"</strong> are not eligible for refund.</p><h2>6. Return Shipping</h2><p>For shipped items, return shipping costs are the customer's responsibility unless the error was ours.</p>`,
+    terms: `<h1>Terms of Service</h1><div class="policy-date">Last updated: October 2026</div><p>By using the <strong>Big Catch Salvage and Thrift</strong> website and placing an order, you agree to the following terms.</p><h2>1. Products & Availability</h2><p>All products are subject to availability. Once an item is marked <strong>SOLD</strong>, it is no longer available.</p><h2>2. Pricing</h2><p>Prices are listed in US Dollars (USD). We reserve the right to change prices at any time.</p><h2>3. Orders & Payment</h2><p>Orders are confirmed only after payment is received and verified. You must send a payment screenshot via WhatsApp.</p><h2>4. Pickup & Shipping</h2><p>Some items are <strong>pickup only</strong> and are clearly marked. Pickup must be arranged within <strong>7 days</strong> of order confirmation.</p><h2>5. Limitation of Liability</h2><p>Big Catch Salvage and Thrift is not liable for damages arising from the use or misuse of items purchased. All items are sold as-is.</p><h2>6. Intellectual Property</h2><p>All content on this site — logos, text, photos, and layout — belongs to Big Catch Salvage and Thrift.</p><h2>7. Contact</h2><p>Questions? Reach us at <strong>+1 (980) 734-8301</strong> via call or WhatsApp.</p>`
   };
 
   function openPolicy(type) {
@@ -797,21 +821,15 @@
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
   }
-
   function closePolicy() {
     document.getElementById('policy-modal').classList.remove('open');
     document.body.style.overflow = '';
   }
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closePolicy();
-  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePolicy(); });
 
   window.addEventListener('DOMContentLoaded', () => {
     updateCartCount();
-    loadProducts().then(() => {
-      handleHash();
-    });
+    loadProducts().then(() => { handleHash(); });
     document.getElementById('pay-confirm').addEventListener('click', confirmPayment);
     document.getElementById('policy-modal').addEventListener('click', (e) => {
       if (e.target.id === 'policy-modal') closePolicy();
@@ -841,6 +859,134 @@
       window.currentPage = 1;
     }
   });
+
+  // ---------- ANIMATIONS SCRIPT ----------
+  (function() {
+    'use strict';
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    function autoTagReveal() {
+      const selectors = [
+        '.home-hero h1', '.home-hero p', '.home-hero .btn',
+        '.home-hero .wa-btn', '.home-hero .support-line',
+        '.main-head', '.filter-toggles', '.product-detail',
+        '.contact-info', '.contact-form', '.pay-box',
+        '.cart-summary', '.footer-support', 'footer .footer-links'
+      ];
+      selectors.forEach(sel => {
+        document.querySelectorAll(sel).forEach(el => {
+          if (!el.classList.contains('reveal') && !el.classList.contains('reveal-left') && !el.classList.contains('reveal-right') && !el.classList.contains('reveal-scale')) {
+            el.classList.add('reveal');
+          }
+        });
+      });
+      document.querySelectorAll('.home-hero + div h2, section h2').forEach(el => el.classList.add('reveal'));
+      document.querySelectorAll('.home-hero + div > div > div').forEach(el => {
+        if (el.children.length >= 2) el.classList.add('reveal');
+      });
+    }
+
+    function staggerGrids() {
+      const grid = document.getElementById('product-grid');
+      if (grid && !grid.classList.contains('stagger')) grid.classList.add('stagger');
+    }
+
+    let observer;
+    function setupObserver() {
+      if (observer) observer.disconnect();
+      observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -50px 0px' });
+
+      document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach(el => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          el.classList.add('visible');
+        } else {
+          observer.observe(el);
+        }
+      });
+    }
+
+    function setupHeaderShadow() {
+      const header = document.querySelector('header');
+      if (!header) return;
+      let ticking = false;
+      window.addEventListener('scroll', () => {
+        if (!ticking) {
+          window.requestAnimationFrame(() => {
+            if (window.scrollY > 20) header.classList.add('scrolled');
+            else header.classList.remove('scrolled');
+            ticking = false;
+          });
+          ticking = true;
+        }
+      }, { passive: true });
+    }
+
+    function setupCartBadgeBump() {
+      const badge = document.getElementById('cart-count');
+      if (!badge) return;
+      new MutationObserver(() => {
+        badge.classList.remove('bump');
+        void badge.offsetWidth;
+        badge.classList.add('bump');
+      }).observe(badge, { childList: true, characterData: true, subtree: true });
+    }
+
+    function wrapShowPage() {
+      if (typeof window.showPage !== 'function') return;
+      const original = window.showPage;
+      window.showPage = function(name) {
+        const result = original.apply(this, arguments);
+        setTimeout(() => {
+          autoTagReveal();
+          staggerGrids();
+          setupObserver();
+        }, 60);
+        return result;
+      };
+    }
+
+    function init() {
+      autoTagReveal();
+      staggerGrids();
+      setupObserver();
+      setupHeaderShadow();
+      setupCartBadgeBump();
+
+      const productGrid = document.getElementById('product-grid');
+      if (productGrid) {
+        new MutationObserver(() => {
+          staggerGrids();
+          autoTagReveal();
+          setupObserver();
+        }).observe(productGrid, { childList: true });
+      }
+
+      setTimeout(wrapShowPage, 100);
+      setTimeout(wrapShowPage, 500);
+      setTimeout(wrapShowPage, 1500);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(setupObserver, 250);
+    });
+  })();
 </script>
 
 <script type="text/javascript">
