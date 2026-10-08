@@ -216,49 +216,6 @@
     color: rgba(255,255,255,0.85);
   }
 
-  .pay-divider {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 24px 0;
-    color: #999;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-  .pay-divider::before,
-  .pay-divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: #e5e5e5;
-  }
-
-  .qr-section {
-    margin-top: 16px;
-  }
-  .qr-section h3 {
-    font-size: 15px;
-    font-weight: 800;
-    color: #2c2c2c;
-    margin-bottom: 4px;
-  }
-  .qr-section p {
-    color: #666;
-    font-size: 12px;
-    margin-bottom: 8px;
-  }
-  .qr-section img.qr {
-    width: 200px;
-    height: 200px;
-    margin: 12px auto;
-    display: block;
-    border: 1px solid #e5e5e5;
-    border-radius: 6px;
-    background: #fafafa;
-  }
-
   footer { padding: 40px 24px; text-align: center; color: #555; font-size: 13px; margin-top: 40px; position: relative; z-index: 2; }
   .footer-links { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin-bottom: 20px; }
   .footer-links a { background-image: linear-gradient(currentColor, currentColor); background-position: 0% 100%; background-repeat: no-repeat; background-size: 0% 2px; transition: background-size 0.3s ease, color 0.25s ease; }
@@ -518,38 +475,56 @@
       <div class="pay-total">Total: $<span id="pay-total">0.00</span></div>
 
       <div class="pay-methods">
-        <button class="pay-method-btn" onclick="requestPayment('card')">
-          <span class="pm-icon">💳</span>
+        <button class="pay-method-btn" onclick="requestPayment('crypto')">
+          <span class="pm-icon">₿</span>
           <span class="pm-text">
-            <span class="pm-label">Credit / Debit Card</span>
-            <span class="pm-sub">Visa, Mastercard, Amex</span>
+            <span class="pm-label">Cryptocurrency</span>
+            <span class="pm-sub">BTC, ETH, USDT</span>
           </span>
           <span class="pm-arrow">→</span>
         </button>
 
-        <button class="pay-method-btn" onclick="requestPayment('bank')">
-          <span class="pm-icon">🏦</span>
-          <span class="pm-text">
-            <span class="pm-label">Bank Transfer</span>
-            <span class="pm-sub">ACH / Wire / Local</span>
-          </span>
-          <span class="pm-arrow">→</span>
-        </button>
-
-        <button class="pay-method-btn" onclick="requestPayment('mobile')">
-          <span class="pm-icon">📱</span>
-          <span class="pm-text">
-            <span class="pm-label">Mobile Money</span>
-            <span class="pm-sub">OPay, Palmpay, Kuda</span>
-          </span>
-          <span class="pm-arrow">→</span>
-        </button>
-
-        <button class="pay-method-btn" onclick="requestPayment('cash')">
+        <button class="pay-method-btn" onclick="requestPayment('cashapp')">
           <span class="pm-icon">💵</span>
           <span class="pm-text">
-            <span class="pm-label">Cash on Pickup</span>
-            <span class="pm-sub">Pay when you collect</span>
+            <span class="pm-label">Cash App</span>
+            <span class="pm-sub">$Cashtag</span>
+          </span>
+          <span class="pm-arrow">→</span>
+        </button>
+
+        <button class="pay-method-btn" onclick="requestPayment('venmo')">
+          <span class="pm-icon">💜</span>
+          <span class="pm-text">
+            <span class="pm-label">Venmo</span>
+            <span class="pm-sub">@username</span>
+          </span>
+          <span class="pm-arrow">→</span>
+        </button>
+
+        <button class="pay-method-btn" onclick="requestPayment('applepay')">
+          <span class="pm-icon">🍎</span>
+          <span class="pm-text">
+            <span class="pm-label">Apple Pay</span>
+            <span class="pm-sub">iPhone / Mac</span>
+          </span>
+          <span class="pm-arrow">→</span>
+        </button>
+
+        <button class="pay-method-btn" onclick="requestPayment('giftcard')">
+          <span class="pm-icon">🎁</span>
+          <span class="pm-text">
+            <span class="pm-label">Gift Card</span>
+            <span class="pm-sub">Amazon, Visa, etc.</span>
+          </span>
+          <span class="pm-arrow">→</span>
+        </button>
+
+        <button class="pay-method-btn" onclick="requestPayment('chime')">
+          <span class="pm-icon">🟢</span>
+          <span class="pm-text">
+            <span class="pm-label">Chime</span>
+            <span class="pm-sub">ChimePay</span>
           </span>
           <span class="pm-arrow">→</span>
         </button>
@@ -562,14 +537,6 @@
           </span>
           <span class="pm-arrow">→</span>
         </button>
-      </div>
-
-      <div class="pay-divider">or scan QR code</div>
-
-      <div class="qr-section">
-        <h3>📱 Scan to Pay</h3>
-        <p>Use your bank app to scan and pay the exact amount.</p>
-        <img class="qr" id="qr-image" src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=REPLACE_WITH_YOUR_PAYMENT_LINK" alt="QR">
       </div>
 
       <div class="pay-steps">
@@ -1000,18 +967,22 @@
     const orderRef = 'BC-' + Date.now().toString().slice(-6);
 
     const methodLabels = {
-      card: '💳 Credit / Debit Card',
-      bank: '🏦 Bank Transfer',
-      mobile: '📱 Mobile Money',
-      cash: '💵 Cash on Pickup',
+      crypto: '₿ Cryptocurrency',
+      cashapp: '💵 Cash App',
+      venmo: '💜 Venmo',
+      applepay: '🍎 Apple Pay',
+      giftcard: '🎁 Gift Card',
+      chime: '🟢 Chime',
       whatsapp: '💬 Just message us'
     };
 
     const methodRequests = {
-      card: 'Please send me your card payment link or details.',
-      bank: 'Please send me your bank account details.',
-      mobile: 'Please send me your mobile money details.',
-      cash: 'I will pay cash when I pick up the item. Please confirm pickup details.',
+      crypto: 'Please send me your crypto wallet address and accepted coins (BTC/ETH/USDT).',
+      cashapp: 'Please send me your $Cashtag so I can send payment.',
+      venmo: 'Please send me your Venmo username so I can send payment.',
+      applepay: 'Please send me your Apple Pay details so I can send payment.',
+      giftcard: 'Please tell me which gift cards you accept (Amazon, Visa, etc.) and how to send them.',
+      chime: 'Please send me your Chime details so I can send payment.',
       whatsapp: 'I have a question about payment. Please help me complete my order.'
     };
 
